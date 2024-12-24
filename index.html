@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #chat-box {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            width: 60%;
+            max-height: 400px;
+            overflow-y: scroll;
+            margin-bottom: 20px;
+        }
+        .user-message {
+            text-align: right;
+            margin: 10px 0;
+        }
+        .assistant-message {
+            text-align: left;
+            margin: 10px 0;
+        }
+        #input-section {
+            display: flex;
+            align-items: center;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        #send-button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mental Health Assistant</h1>
+    <div id="chat-box"></div>
+    <div id="input-section">
+        <input type="text" id="user-input" placeholder="Type your query here..." />
+        <button id="send-button">Send</button>
+    </div>
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        // Function to add messages to the chat box
+        function addMessage(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isUser ? 'user-message' : 'assistant-message';
+            messageDiv.textContent = content;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Event listener for the send button
+        sendButton.addEventListener('click', async () => {
+            const query = userInput.value.trim();
+            if (!query) return;
+
+            // Add user message to chat
+            addMessage(query, true);
+
+            // Clear input field
+            userInput.value = '';
+
+            // Send query to backend
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                const data = await response.json();
+
+                // Add assistant response to chat
+                addMessage(data.answer, false);
+            } catch (error) {
+                console.error('Error fetching response:', error);
+                addMessage('Sorry, something went wrong.', false);
+            }
+        });
+    </script>
+</body>
+</html>
